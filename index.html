@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-animation-quality="high">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BMW M5 Competition 3D Fuel Consumption Analysis Dashboard - Premium automotive telemetry, real-time 3D vehicle modeling, and distance-weighted fuel efficiency analytics.">
+  <title>AERO // FUEL 3D - BMW M5 Competition Telemetry</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- App Layout Frame -->
+  <div class="app-layout">
+
+    <!-- ====================================================================
+         1. SIDEBAR NAVIGATION
+         ==================================================================== -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div>
+        <div class="sidebar-header">
+          <div class="brand-logo-icon">🏁</div>
+          <div class="brand-text">
+            <h2>AERO // FUEL</h2>
+            <span>BMW M5 TELEMETRY v2.0</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#overview" class="sidebar-nav-item active" data-page="overview">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Overview</span>
+          </a>
+          <a href="#add" class="sidebar-nav-item" data-page="add">
+            <i data-lucide="plus-circle"></i>
+            <span>Add Fuel Entry</span>
+          </a>
+          <a href="#vehicles" class="sidebar-nav-item" data-page="vehicles">
+            <i data-lucide="car"></i>
+            <span>Vehicles</span>
+          </a>
+          <a href="#search" class="sidebar-nav-item" data-page="search">
+            <i data-lucide="search"></i>
+            <span>Search Records</span>
+          </a>
+          <a href="#all" class="sidebar-nav-item" data-page="all">
+            <i data-lucide="table"></i>
+            <span>All Records</span>
+          </a>
+          <a href="#analytics" class="sidebar-nav-item" data-page="analytics">
+            <i data-lucide="line-chart"></i>
+            <span>Analytics</span>
+          </a>
+          <a href="#reports" class="sidebar-nav-item" data-page="reports">
+            <i data-lucide="file-text"></i>
+            <span>Reports</span>
+          </a>
+          <a href="#settings" class="sidebar-nav-item" data-page="settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="storage-pill">
+          <div>
+            <span class="storage-status-dot"></span>
+            <span>Local Storage</span>
+          </div>
+          <strong id="sidebarRecordCount" class="text-cyan">0 records</strong>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ====================================================================
+         2. MAIN CONTENT & TOP NAVIGATION
+         ==================================================================== -->
+    <main class="app-main">
+
+      <!-- Top Navigation Bar -->
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <button type="button" class="menu-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Navigation">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="telemetry-clock" id="topNavClock">
+            Live Telemetry Clock
+          </div>
+        </div>
+
+        <div class="top-bar-right">
+          <button type="button" class="quick-search-btn" data-nav-target="search" title="Search Shortcut (Press '/')">
+            <i data-lucide="search"></i>
+            <span>Quick Search...</span>
+            <span class="kbd-shortcut">/</span>
+          </button>
+
+          <button type="button" class="btn btn-primary btn-sm" data-nav-target="add">
+            <i data-lucide="plus"></i>
+            <span>New Entry</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Dynamic Content Container -->
+      <div class="main-content" id="mainContentArea">
+
+        <!-- ================================================================
+             VIEW 1: OVERVIEW DASHBOARD (BMW M5 3D, KPIs, Charts, Leaderboard)
+             ================================================================ -->
+        <section class="app-view-panel active" id="view-overview">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h1>Fleet Telemetry Overview</h1>
+              <p>Real-time 3D BMW M5 Competition model inspection, distance-weighted fuel economy, and operational statistics.</p>
+            </div>
+            <div>
+              <button type="button" class="btn btn-secondary btn-sm" id="btnToggleAutoRotate" title="Toggle 3D Orbit Rotation">
+                <i data-lucide="rotate-cw"></i> <span>Auto Rotate</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3D HERO SECTION (BMW M5 COMPETITION) -->
+          <div class="hero-3d-card tilt-card">
+            <div class="hero-car-viewport" id="heroCarCanvas">
+              <!-- Three.js renders here -->
+            </div>
+
+            <!-- Top HUD Overlay -->
+            <div class="hero-hud-top">
+              <div class="hero-telemetry-badge">
+                <span class="pulse-led"></span>
+                <span>BMW M5 COMPETITION // 3D MOTORSPORT TELEMETRY</span>
+              </div>
+              <div class="hero-camera-tools">
+                <button type="button" class="cam-tool-btn" data-cam-view="iso" title="Isometric Perspective">ISO</button>
+                <button type="button" class="cam-tool-btn" data-cam-view="front" title="Front Kidney Grille Elevation">FRONT</button>
+                <button type="button" class="cam-tool-btn" data-cam-view="side" title="Side Profile & Hofmeister Kink">SIDE</button>
+                <button type="button" class="cam-tool-btn" data-cam-view="top" title="Top-Down Carbon Roof">TOP</button>
+                <button type="button" class="cam-tool-btn" id="btnToggleHeadlights" title="Toggle BMW Laserlight Headlights">LIGHTS</button>
+                <button type="button" class="cam-tool-btn" id="btnToggleWireframe" title="Toggle Wireframe Hologram">HOLO</button>
+              </div>
+            </div>
+
+            <!-- Bottom HUD Overlay -->
+            <div class="hero-hud-bottom">
+              <div class="hero-vehicle-info">
+                <h3>BMW M5 Competition // 4.4L V8 TwinPower Turbo</h3>
+                <p>617 HP • 750 Nm • M xDrive • 0-100: 3.3s • Drag &amp; Touch to Inspect</p>
+              </div>
+              <div class="hero-color-palette" title="Click to customize BMW M paint finish">
+                <div class="hero-color-swatch" style="background-color: #004fc7;" data-color="#004fc7" title="Marina Bay Blue Metallic"></div>
+                <div class="hero-color-swatch" style="background-color: #0b6647;" data-color="#0b6647" title="Isle of Man Green"></div>
+                <div class="hero-color-swatch" style="background-color: #c8102e;" data-color="#c8102e" title="Toronto Red Metallic"></div>
+                <div class="hero-color-swatch" style="background-color: #11141a;" data-color="#11141a" title="Black Sapphire Metallic"></div>
+                <div class="hero-color-swatch" style="background-color: #f3f4f6;" data-color="#f3f4f6" title="Alpine White"></div>
+                <div class="hero-color-swatch" style="background-color: #4b5563;" data-color="#4b5563" title="Frozen Deep Gray"></div>
+                <div class="hero-color-swatch" style="background-color: #eab308;" data-color="#eab308" title="Sao Paulo Yellow"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State Banner -->
+          <div id="overviewEmptyBanner" class="chart-card" style="display: none; align-items: center; justify-content: space-between; flex-direction: row; margin-bottom: 24px; border-color: rgba(0, 240, 255, 0.4); background: rgba(0, 240, 255, 0.05); padding: 18px 24px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span style="font-size: 1.8rem;">💡</span>
+              <div>
+                <h4 style="color: var(--text-primary); font-size: 1.05rem;">No fuel entries recorded yet</h4>
+                <p style="color: var(--text-secondary); font-size: 0.85rem;">Add your first vehicle fuel record, or generate 500 random car records to test the 3D analytics.</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="btn btn-secondary btn-sm" id="emptyBannerLoadDemoBtn">⚡ Generate 500 Records</button>
+              <button type="button" class="btn btn-primary btn-sm" data-nav-target="add">+ Add Record</button>
+            </div>
+          </div>
+
+          <!-- KPI METRIC CARDS -->
+          <div class="kpi-grid">
+            <div class="stat-card tilt-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Fleet Size</span>
+                <div class="stat-icon"><i data-lucide="car"></i></div>
+              </div>
+              <div class="stat-value" id="kpiTotalVehicles">0</div>
+              <div class="stat-subtext">Distinct vehicles tracked</div>
+            </div>
+
+            <div class="stat-card tilt-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Total Distance</span>
+                <div class="stat-icon"><i data-lucide="gauge"></i></div>
+              </div>
+              <div class="stat-value" id="kpiTotalDist">0 km</div>
+              <div class="stat-subtext">Cumulative odometer logged</div>
+            </div>
+
+            <div class="stat-card tilt-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Fuel Consumed</span>
+                <div class="stat-icon"><i data-lucide="fuel"></i></div>
+              </div>
+              <div class="stat-value text-cyan" id="kpiTotalFuel">0 L</div>
+              <div class="stat-subtext">Total fuel volume dispensed</div>
+            </div>
+
+            <div class="stat-card tilt-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Total Expenditure</span>
+                <div class="stat-icon"><i data-lucide="indian-rupee"></i></div>
+              </div>
+              <div class="stat-value text-emerald" id="kpiTotalCost">₹ 0</div>
+              <div class="stat-subtext">Total fuel spend across all entries</div>
+            </div>
+
+            <div class="stat-card tilt-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Average Mileage</span>
+                <div class="stat-icon"><i data-lucide="zap"></i></div>
+              </div>
+              <div class="stat-value text-cyan" id="kpiAvgMileage">0.00 km/L</div>
+              <div class="stat-subtext highlight">Distance-weighted aggregate</div>
+            </div>
+
+            <div class="stat-card tilt-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Operating Cost / KM</span>
+                <div class="stat-icon"><i data-lucide="trending-up"></i></div>
+              </div>
+              <div class="stat-value" id="kpiCostPerKm">₹ 0.00 / km</div>
+              <div class="stat-subtext">Average cost per kilometre driven</div>
+            </div>
+
+            <div class="stat-card tilt-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Best Performing Car</span>
+                <div class="stat-icon"><i data-lucide="award"></i></div>
+              </div>
+              <div class="stat-value" id="kpiBestVehicle" style="font-size: 1.25rem;">--</div>
+              <div class="stat-subtext">Highest recorded fuel efficiency</div>
+            </div>
+          </div>
+
+          <!-- CHARTS & LEADERBOARD SPLIT -->
+          <div class="dashboard-split-grid">
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h3>Consumption &amp; Distance Trajectory</h3>
+                <span class="text-muted" style="font-size: 0.8rem;">Monthly Progression</span>
+              </div>
+              <div class="chart-canvas-wrapper">
+                <canvas id="overviewTrendsChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h3>Efficiency Leaderboard</h3>
+                <span class="text-cyan" style="font-size: 0.8rem;">km/L Ranking</span>
+              </div>
+              <div class="leaderboard-list" id="vehicleLeaderboard">
+                <!-- Dynamic ranking items -->
+              </div>
+            </div>
+          </div>
+
+          <!-- RECENT ENTRIES TABLE -->
+          <div class="table-card">
+            <div class="view-header" style="margin-bottom: 16px;">
+              <div class="view-title-group">
+                <h3 style="font-size: 1.15rem;">Recent Fuel Fill-ups</h3>
+                <p>Latest recorded vehicle telemetry events.</p>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" data-nav-target="all">
+                <span>View All Entries</span> <i data-lucide="arrow-right"></i>
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Vehicle</th>
+                    <th>Fuel Type</th>
+                    <th>Distance</th>
+                    <th>Fuel Dispensed</th>
+                    <th>Calculated Mileage</th>
+                    <th>Total Cost</th>
+                  </tr>
+                </thead>
+                <tbody id="recentRecordsTableBody">
+                  <!-- Populated by UI -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 2: ADD / EDIT FUEL ENTRY (4-Step Wizard)
+             ================================================================ -->
+        <section class="app-view-panel" id="view-add">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h1 id="wizardTitle">Add Vehicle / Fuel Record</h1>
+              <p>Step-by-step fuel entry wizard with real-time mileage computation and vehicle preview.</p>
+            </div>
+          </div>
+
+          <div class="wizard-container">
+            <!-- Stepper Progress Header -->
+            <div class="wizard-stepper-header">
+              <div class="step-indicator-item active" data-step="1">
+                <div class="step-circle">1</div>
+                <span class="step-title">Select Brand</span>
+              </div>
+              <div class="step-indicator-item" data-step="2">
+                <div class="step-circle">2</div>
+                <span class="step-title">Select Model</span>
+              </div>
+              <div class="step-indicator-item" data-step="3">
+                <div class="step-circle">3</div>
+                <span class="step-title">Fuel &amp; Specs</span>
+              </div>
+              <div class="step-indicator-item" data-step="4">
+                <div class="step-circle">4</div>
+                <span class="step-title">Review &amp; Save</span>
+              </div>
+            </div>
+
+            <!-- STEP 1: BRAND SELECTION -->
+            <div class="wizard-step-panel active" data-step="1">
+              <div class="form-group">
+                <label for="brandSearch" class="form-label">Search or Enter Vehicle Brand</label>
+                <input type="text" id="brandSearch" class="form-control" placeholder="Type to filter e.g. BMW, Toyota, Honda, Tata, Mercedes-Benz..." autocomplete="off">
+              </div>
+              <div class="pills-grid" id="brandResults">
+                <!-- Dynamically populated brands -->
+              </div>
+            </div>
+
+            <!-- STEP 2: MODEL SELECTION -->
+            <div class="wizard-step-panel" data-step="2">
+              <div class="form-group">
+                <label for="modelSearch" class="form-label">Search or Enter Vehicle Model</label>
+                <input type="text" id="modelSearch" class="form-control" placeholder="Type model e.g. M5, M5 Competition, M3, 5 Series..." autocomplete="off">
+              </div>
+              <div class="pills-grid" id="modelResults">
+                <!-- Dynamically populated models -->
+              </div>
+            </div>
+
+            <!-- STEP 3: LOG FILL-UP SPECS & NUMBERS -->
+            <div class="wizard-step-panel" data-step="3">
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label for="year" class="form-label">Model Year (2000 - 2035)</label>
+                  <input type="number" id="year" class="form-control" value="2024" min="2000" max="2035">
+                </div>
+
+                <div class="form-group">
+                  <label for="fuel" class="form-label">Fuel Type</label>
+                  <select id="fuel" class="form-control">
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Electric">Electric</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="CNG">CNG</option>
+                    <option value="LPG">LPG</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="color" class="form-label">Vehicle Color</label>
+                  <input type="color" id="color" class="form-control" value="#004fc7" style="height: 48px; padding: 4px; cursor: pointer;">
+                </div>
+              </div>
+
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label for="distance" class="form-label">Distance Travelled (km) *</label>
+                  <input type="number" id="distance" class="form-control" min="0.1" step="0.1" placeholder="e.g. 520">
+                </div>
+
+                <div class="form-group">
+                  <label for="litres" class="form-label">Fuel Used (Litres) *</label>
+                  <input type="number" id="litres" class="form-control" min="0.01" step="0.01" placeholder="e.g. 30.5">
+                </div>
+
+                <div class="form-group">
+                  <label for="cost" class="form-label">Total Fuel Cost (₹ INR) *</label>
+                  <input type="number" id="cost" class="form-control" min="1" step="0.1" placeholder="e.g. 3150">
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="recordDate" class="form-label">Fill-up Date</label>
+                  <input type="date" id="recordDate" class="form-control">
+                </div>
+
+                <div class="form-group">
+                  <label for="recordNotes" class="form-label">Trip Notes / Context (Optional)</label>
+                  <input type="text" id="recordNotes" class="form-control" placeholder="e.g. Expressway highway trip, city AC full...">
+                </div>
+              </div>
+
+              <!-- Live Auto-Calculation Bar -->
+              <div class="form-group" style="margin-top: 10px;">
+                <label class="form-label">Real-Time Computed Fuel Telemetry</label>
+                <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                  <div>
+                    <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Mileage:</span>
+                    <span class="calculated-badge" id="mileageCalcDisplay">-- km/L</span>
+                  </div>
+                  <div>
+                    <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">Operating Cost:</span>
+                    <span class="calculated-badge" id="costPerKmDisplay" style="color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1);">₹ -- / km</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 4: REVIEW & SAVE -->
+            <div class="wizard-step-panel" data-step="4">
+              <div class="review-summary-card">
+                <div class="review-car-header">
+                  <div>
+                    <h3 id="reviewCarTitle" style="font-size: 1.4rem;">Vehicle Name</h3>
+                    <p id="reviewCarMeta" style="color: var(--accent-cyan); font-family: var(--font-mono);">2024 • Petrol</p>
+                  </div>
+                  <div id="reviewColorSwatch" style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff;"></div>
+                </div>
+
+                <div class="review-stats-grid">
+                  <div class="review-stat-item">
+                    <span>Distance</span>
+                    <strong id="reviewDist">-- km</strong>
+                  </div>
+                  <div class="review-stat-item">
+                    <span>Fuel Used</span>
+                    <strong id="reviewLitres" class="text-cyan">-- L</strong>
+                  </div>
+                  <div class="review-stat-item">
+                    <span>Calculated Mileage</span>
+                    <strong id="reviewMileage" class="text-cyan">-- km/L</strong>
+                  </div>
+                  <div class="review-stat-item">
+                    <span>Total Expense</span>
+                    <strong id="reviewCost" class="text-emerald">₹ --</strong>
+                  </div>
+                  <div class="review-stat-item">
+                    <span>Cost / KM</span>
+                    <strong id="reviewCostPerKm">₹ -- / km</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Wizard Footer Buttons -->
+            <div class="wizard-footer-actions">
+              <button type="button" class="btn btn-secondary" id="wizardBackBtn" style="visibility: hidden;">
+                <i data-lucide="arrow-left"></i> <span>Back</span>
+              </button>
+              <div style="display: flex; gap: 12px;">
+                <button type="button" class="btn btn-secondary" id="wizardCancelBtn">
+                  <span>Cancel</span>
+                </button>
+                <button type="button" class="btn btn-primary" id="wizardNextBtn">
+                  <span>Next Step</span> <i data-lucide="arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 3: VEHICLES & CATALOG BROWSER
+             ================================================================ -->
+        <section class="app-view-panel" id="view-vehicles">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h1>Vehicle Catalog &amp; Fleet</h1>
+              <p>Explore over 49 automotive manufacturers and hundreds of supported models.</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" data-nav-target="add">
+              <span>+ Add Fill-up</span>
+            </button>
+          </div>
+
+          <div class="catalog-brands-grid" id="catalogBrandsGrid">
+            <!-- Populated with all 49+ brands -->
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 4: SEARCH RECORDS (Multi-filter, Table & Cards View)
+             ================================================================ -->
+        <section class="app-view-panel" id="view-search">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h1>Search Fuel Records</h1>
+              <p>Filter by vehicle, brand, model, fuel type, or sort by mileage and expenditure.</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn-icon active" id="viewModeTableBtn" title="Table View">
+                <i data-lucide="list"></i>
+              </button>
+              <button type="button" class="btn-icon" id="viewModeCardsBtn" title="3D Cards Grid View">
+                <i data-lucide="grid"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Multi-Filter Bar -->
+          <div class="chart-card" style="margin-bottom: 24px; padding: 18px;">
+            <div class="form-grid-3" style="gap: 16px;">
+              <div>
+                <label for="searchFilterQuery" class="form-label">Search Keyword</label>
+                <input type="text" id="searchFilterQuery" class="form-control" placeholder="Search vehicle name, notes...">
+              </div>
+              <div>
+                <label for="searchFilterFuel" class="form-label">Fuel Type</label>
+                <select id="searchFilterFuel" class="form-control">
+                  <option value="all">All Fuel Types</option>
+                  <option value="Petrol">Petrol</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="Electric">Electric</option>
+                  <option value="Hybrid">Hybrid</option>
+                  <option value="CNG">CNG</option>
+                  <option value="LPG">LPG</option>
+                </select>
+              </div>
+              <div>
+                <label for="searchFilterYear" class="form-label">Model Year</label>
+                <select id="searchFilterYear" class="form-control">
+                  <option value="all">All Years</option>
+                  <option value="2025">2025</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                  <option value="2021">2021</option>
+                  <option value="2020">2020</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top: 14px;">
+              <div>
+                <label for="searchFilterSort" class="form-label">Sort Records By</label>
+                <select id="searchFilterSort" class="form-control" style="max-width: 320px;">
+                  <option value="date_desc">Date (Newest First)</option>
+                  <option value="date_asc">Date (Oldest First)</option>
+                  <option value="efficiency_desc">Mileage (Highest First)</option>
+                  <option value="efficiency_asc">Mileage (Lowest First)</option>
+                  <option value="cost_desc">Cost (Highest First)</option>
+                  <option value="cost_asc">Cost (Lowest First)</option>
+                  <option value="dist_desc">Distance (Longest First)</option>
+                </select>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px;">
+              <span id="searchResultsCount" class="text-cyan" style="font-size: 0.85rem; font-weight: 600;">0 found</span>
+              <button type="button" class="btn btn-secondary btn-sm" id="clearSearchFiltersBtn">
+                <i data-lucide="rotate-ccw"></i> <span>Reset Filters</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Results Container (Table or 3D Cards) -->
+          <div id="searchResultsContainer">
+            <!-- Rendered by UI -->
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 5: ALL RECORDS (Pagination & Full Management)
+             ================================================================ -->
+        <section class="app-view-panel" id="view-all">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h1>All Saved Records</h1>
+              <p id="allRecordsCount">Browse and manage full history of logged fuel records.</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-secondary btn-sm" id="btnLoad500AllRecords">
+                <i data-lucide="zap"></i> <span>⚡ Generate 500 Records</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btnExportCSV">
+                <i data-lucide="download"></i> <span>Export CSV</span>
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" data-nav-target="add">
+                <i data-lucide="plus"></i> <span>Add Record</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Vehicle</th>
+                    <th>Fuel</th>
+                    <th>Distance</th>
+                    <th>Fuel Used</th>
+                    <th>Mileage</th>
+                    <th>Total Cost</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="allRecordsTableBody">
+                  <!-- Populated by UI -->
+                </tbody>
+                <tfoot id="allRecordsSummaryFooter">
+                  <tr>
+                    <td colspan="4"><strong>Fleet Totals &amp; Weighted Efficiency:</strong></td>
+                    <td id="footerDist">-- km</td>
+                    <td id="footerLitres">-- L</td>
+                    <td id="footerEfficiency">-- km/L</td>
+                    <td id="footerCost">₹ --</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div id="allRecordsPagination" style="margin-top: 16px;"></div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 6: ADVANCED ANALYTICS & INTELLIGENCE
+             ================================================================ -->
+        <section class="app-view-panel" id="view-analytics">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h1>Telemetry Intelligence &amp; Trends</h1>
+              <p>Data-driven insights, multi-vehicle comparisons, and future trip fuel expenditure estimation.</p>
+            </div>
+          </div>
+
+          <!-- VEHICLE INTELLIGENCE OBSERVATIONS -->
+          <div class="insights-grid" id="intelligenceInsightsContainer">
+            <!-- Populated by window.FuelInsights -->
+          </div>
+
+          <!-- TRIP COST ESTIMATOR -->
+          <div class="trip-estimator-card tilt-card">
+            <div class="view-title-group" style="margin-bottom: 16px;">
+              <h3 style="font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="calculator" class="text-cyan"></i> Future Trip Fuel &amp; Expense Estimator
+              </h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                Project required fuel litres and anticipated cost based on historical vehicle efficiency.
+              </p>
+            </div>
+
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="estimatorDistance" class="form-label">Trip Distance (km)</label>
+                <input type="number" id="estimatorDistance" class="form-control" value="350" min="1" step="1">
+              </div>
+
+              <div class="form-group">
+                <label for="estimatorVehicleSelect" class="form-label">Select Vehicle</label>
+                <select id="estimatorVehicleSelect" class="form-control">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="estimatorPrice" class="form-label">Fuel Price (₹ / Litre)</label>
+                <input type="number" id="estimatorPrice" class="form-control" value="103.5" min="1" step="0.5">
+              </div>
+            </div>
+
+            <div id="tripEstimatorResult">
+              <!-- Result card rendered here -->
+            </div>
+          </div>
+
+          <!-- DETAILED CHARTS GRID -->
+          <div class="dashboard-split-grid">
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h3>Fuel Consumption Timeline (km vs Litres)</h3>
+              </div>
+              <div class="chart-canvas-wrapper">
+                <canvas id="analyticsTrendsChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h3>Monthly Fuel Expenditure (₹ INR)</h3>
+              </div>
+              <div class="chart-canvas-wrapper">
+                <canvas id="analyticsCostChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-split-grid">
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h3>Fleet Vehicle Mileage Comparison (km/L)</h3>
+              </div>
+              <div class="chart-canvas-wrapper">
+                <canvas id="analyticsEfficiencyChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h3>Fuel Type Volume Distribution</h3>
+              </div>
+              <div class="chart-canvas-wrapper">
+                <canvas id="analyticsFuelShareChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 7: REPORTS & EXPORT
+             ================================================================ -->
+        <section class="app-view-panel" id="view-reports">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h1>Fuel Telemetry Reports</h1>
+              <p>Downloadable CSV audits, full JSON database backups, and printer-ready executive summaries.</p>
+            </div>
+            <div style="display: flex; gap: 10px;" class="no-print">
+              <button type="button" class="btn btn-secondary btn-sm" id="btnPrintReport">
+                <i data-lucide="printer"></i> <span>Print Report</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="print-only-header">
+            <h2>AERO // FUEL 3D - EXECUTIVE TELEMETRY AUDIT</h2>
+            <p>Generated on: <span id="reportGeneratedDate">--</span></p>
+          </div>
+
+          <div class="chart-card" style="margin-bottom: 24px;">
+            <h3 style="margin-bottom: 16px;">Executive Fleet Summary</h3>
+            <div class="kpi-grid" id="reportSummaryKPIs">
+              <!-- Populated by App -->
+            </div>
+          </div>
+
+          <div class="table-card">
+            <h3 style="margin-bottom: 16px;">Detailed Record Breakdown</h3>
+            <div class="table-responsive">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Record ID</th>
+                    <th>Date</th>
+                    <th>Vehicle</th>
+                    <th>Fuel Type</th>
+                    <th>Distance</th>
+                    <th>Fuel (L)</th>
+                    <th>Mileage (km/L)</th>
+                    <th>Total Cost (₹)</th>
+                  </tr>
+                </thead>
+                <tbody id="reportTableBody">
+                  <!-- Populated by App -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 8: SETTINGS & DATA MANAGEMENT
+             ================================================================ -->
+        <section class="app-view-panel" id="view-settings">
+          <div class="view-header">
+            <div class="view-title-group">
+              <h1>System Settings &amp; Preferences</h1>
+              <p>Visual theme, 3D graphics rendering quality, accessibility, and local storage data management.</p>
+            </div>
+          </div>
+
+          <div class="chart-card" style="margin-bottom: 24px;">
+            <h3 style="margin-bottom: 18px;">Interface &amp; Graphic Fidelity</h3>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="settingTheme" class="form-label">Theme Mode</label>
+                <select id="settingTheme" class="form-control">
+                  <option value="dark">Futuristic Dark (Deep Navy &amp; Cyan)</option>
+                  <option value="midnight">Midnight Indigo (Subtle Violet)</option>
+                  <option value="cyberpunk">Cyberpunk Neon (Magenta &amp; Cyan)</option>
+                  <option value="light">Clean Light Mode</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="settingQuality" class="form-label">3D Graphics Fidelity</label>
+                <select id="settingQuality" class="form-control">
+                  <option value="high">High Fidelity (Full Shadows &amp; Particles)</option>
+                  <option value="medium">Medium (Standard 3D Shader)</option>
+                  <option value="low">Low Power / Battery Saver</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Accessibility</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 12px;">
+                  <input type="checkbox" id="settingReducedMotion" style="width: 20px; height: 20px; cursor: pointer;">
+                  <label for="settingReducedMotion" style="cursor: pointer; font-size: 0.9rem;">Enable Reduced Motion</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3 style="margin-bottom: 18px;">Data Persistence &amp; Backup</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 20px;">
+              All records are stored locally in your browser's <code>localStorage</code> under the key <code>fuel_records_v1</code>.
+              Your data remains private on this computer and is not synced to external servers unless you export a backup.
+            </p>
+
+            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-primary" id="btnGenerate500Records">
+                <i data-lucide="zap"></i> <span>⚡ Generate 500 Car Records</span>
+              </button>
+              <button type="button" class="btn btn-secondary" id="btnExportJSON">
+                <i data-lucide="download"></i> <span>Download JSON Backup</span>
+              </button>
+              <button type="button" class="btn btn-secondary" id="btnImportJSON">
+                <i data-lucide="upload"></i> <span>Restore from JSON File</span>
+              </button>
+              <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
+
+              <button type="button" class="btn btn-secondary" id="btnLoadSampleData">
+                <i data-lucide="sparkles"></i> <span>Reset 500 Fleet Records</span>
+              </button>
+              <button type="button" class="btn btn-danger-ghost" id="btnClearAllData">
+                <i data-lucide="trash-2"></i> <span>Erase All Data</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Cyber Modal Dialog Overlay -->
+  <div class="cyber-modal-overlay" id="cyberModal">
+    <div class="cyber-modal-card">
+      <div class="cyber-modal-header">
+        <h3 id="cyberModalTitle">Confirm Action</h3>
+        <button type="button" class="cyber-modal-close" id="cyberModalClose">&times;</button>
+      </div>
+      <div class="cyber-modal-body" id="cyberModalBody">
+        Are you sure?
+      </div>
+      <div class="cyber-modal-footer">
+        <button type="button" class="btn btn-secondary" id="cyberModalCancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="cyberModalConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- External CDN Libraries (Three.js, OrbitControls, GLTFLoader, Chart.js, Lucide Icons) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Application Modules -->
+  <script src="js/catalog.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/three-scene.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/insights.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
