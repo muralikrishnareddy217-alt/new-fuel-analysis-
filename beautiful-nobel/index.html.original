@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fuel Consumption Analysis</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #edf6ff, #f8fafc);
+      color: #1f2937;
+      min-height: 100vh;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid #dfeaf5;
+      border-radius: 22px;
+      box-shadow: 0 20px 50px rgba(15,23,42,0.08);
+      padding: 26px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      color: #0f172a;
+    }
+
+    .tag {
+      background: #e0edff;
+      color: #1d4ed8;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .menu-card {
+      background: linear-gradient(135deg, #ffffff, #edf6ff);
+      border: 1px solid #dfeaf5;
+      border-radius: 18px;
+      padding: 26px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s ease;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 20px rgba(37,99,235,0.04);
+    }
+
+    .menu-card:hover {
+      transform: translateY(-2px);
+      border-color: #c9dcff;
+      box-shadow: 0 16px 30px rgba(59,130,246,0.08);
+    }
+
+    .icon {
+      font-size: 2.2rem;
+      width: 62px;
+      height: 62px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #eaf2ff;
+      border: 1px solid #dbeafe;
+    }
+
+    .menu-card h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #0f172a;
+    }
+
+    .menu-card p {
+      margin: 0;
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #e2ebf5;
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 22px;
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      margin-bottom: 18px;
+      color: #1f2937;
+    }
+
+    .progress {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .step-pill {
+      background: #edf2f7;
+      border: 1px solid #dce6f1;
+      color: #64748b;
+      border-radius: 12px;
+      text-align: center;
+      padding: 12px 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .step-pill.active {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: white;
+      border-color: #2563eb;
+    }
+
+    .step-pill.done {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .search-box {
+      background: #f8fbff;
+      border: 1px solid #dfeaf8;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d8e3f0;
+      border-radius: 12px;
+      background: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    .results {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .result-item {
+      padding: 12px 14px;
+      border: 1px solid #e2ebf5;
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .result-item:hover {
+      background: #eef5ff;
+      border-color: #bfd5ff;
+    }
+
+    .result-item.selected {
+      background: #eaf2ff;
+      border-color: #5b8ef7;
+    }
+
+    .custom-item {
+      padding: 12px 14px;
+      border: 1px dashed #bfd5ff;
+      border-radius: 12px;
+      background: #f8fbff;
+      cursor: pointer;
+      margin-top: 10px;
+      font-weight: 700;
+      color: #1d4ed8;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-weight: 700;
+      color: #334155;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d8e3f0;
+      border-radius: 12px;
+      background: #fbfdff;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    .summary-box {
+      background: linear-gradient(180deg, #f9fbff, #edf6ff);
+      border: 1px solid #dbeafe;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .summary-box p {
+      margin: 7px 0;
+      color: #475569;
+    }
+
+    .result-box {
+      background: linear-gradient(135deg, #f8fafc, #eef4ff);
+      border: 1px solid #ddeaf9;
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .car-symbol {
+      position: relative;
+      width: 190px;
+      height: 120px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #e0ebff, #f3f7ff);
+      border: 1px solid #d7e7ff;
+      overflow: hidden;
+    }
+
+    .car-body {
+      position: absolute;
+      left: 28px;
+      bottom: 30px;
+      width: 130px;
+      height: 46px;
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border-radius: 18px 18px 12px 12px;
+      box-shadow: inset 0 -8px 0 rgba(255,255,255,0.12);
+    }
+
+    .car-body::before {
+      content: "";
+      position: absolute;
+      left: 12px;
+      top: -20px;
+      width: 58px;
+      height: 20px;
+      background: #dfeeff;
+      border-radius: 18px 18px 8px 8px;
+      border: 2px solid rgba(37,99,235,0.16);
+    }
+
+    .car-body::after {
+      content: "";
+      right: 16px;
+      top: 14px;
+      position: absolute;
+      width: 18px;
+      height: 12px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 4px;
+    }
+
+    .wheel {
+      position: absolute;
+      bottom: 10px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 6px solid #94a3b8;
+    }
+
+    .wheel.left { left: 30px; }
+    .wheel.right { right: 30px; }
+
+    .car-text h3 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #0f172a;
+    }
+
+    .car-text p {
+      margin: 8px 0 0;
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 22px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: white;
+      box-shadow: 0 12px 22px rgba(37,99,235,0.18);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    }
+
+    .btn-secondary {
+      background: #edf2f7;
+      color: #1f2937;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-row input {
+      flex: 1 1 260px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border: 1px solid #e2ebf5;
+      border-radius: 16px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      margin: 0 0 8px;
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .stat-card p {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e5edf5;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fbff;
+      color: #334155;
+    }
+
+    .analysis-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .analysis-item {
+      background: #f8fafc;
+      border: 1px solid #e2ebf5;
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .result-item, .custom-item { display: block; width: 100%; text-align: left; font-family: inherit; font-size: 1rem; }
+    .hint { margin: 0; color: #64748b; }
+    .home-btn { margin-bottom: 14px; padding: 8px 14px; font-size: 0.9rem; }
+    .del-btn { padding: 6px 12px; font-size: 0.85rem; width: auto; }
+    .menu-card:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+
+    @media (max-width: 700px) {
+      body { padding: 18px; }
+      .container { padding: 18px; }
+      .progress { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+      .actions { flex-direction: column-reverse; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Fuel Consumption Analysis</h1>
+      <div class="tag">Vehicle Records</div>
+    </div>
+
+    <div class="menu" id="menu">
+      <div class="menu-card" data-page="add" tabindex="0" role="button">
+        <div class="icon">🚗</div>
+        <h3>Add Details</h3>
+        <p>Enter vehicle info</p>
+      </div>
+
+      <div class="menu-card" data-page="search" tabindex="0" role="button">
+        <div class="icon">🔍</div>
+        <h3>Search Vehicle</h3>
+        <p>Find specific record</p>
+      </div>
+
+      <div class="menu-card" data-page="all" tabindex="0" role="button">
+        <div class="icon">📋</div>
+        <h3>All Records</h3>
+        <p>View all data</p>
+      </div>
+    </div>
+
+    <section class="panel active" id="addPanel">
+      <button type="button" class="btn-secondary home-btn">← Menu</button>
+      <h2>Add Details</h2>
+
+      <div class="progress">
+        <div class="step-pill active">1. Brand</div>
+        <div class="step-pill">2. Model</div>
+        <div class="step-pill">3. Details</div>
+        <div class="step-pill">4. Review</div>
+      </div>
+
+      <div id="addWizard">
+        <div class="step active" data-step="1">
+          <div class="search-box">
+            <input id="brandSearch" type="text" placeholder="Search car brand..." />
+          </div>
+          <div id="brandResults" class="results"></div>
+        </div>
+
+        <div class="step" data-step="2">
+          <div class="search-box">
+            <input id="modelSearch" type="text" placeholder="Search car model..." />
+          </div>
+          <div id="modelResults" class="results"></div>
+        </div>
+
+        <div class="step" data-step="3">
+          <div class="fields">
+            <div class="field">
+              <label for="year">Year</label>
+              <input id="year" type="number" min="2000" max="2035" value="2024" />
+            </div>
+
+            <div class="field">
+              <label for="fuel">Fuel Type</label>
+              <select id="fuel">
+                <option>Petrol</option>
+                <option>Diesel</option>
+                <option>Hybrid</option>
+                <option>Electric</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="mileage">Mileage (km/L, calculated)</label>
+              <input id="mileage" type="number" step="0.01" readonly placeholder="Calculated" />
+            </div>
+
+            <div class="field">
+              <label for="color">Color</label>
+              <input id="color" type="text" value="Blue" />
+            </div>
+
+            <div class="field">
+              <label for="distance">Distance (km)</label>
+              <input id="distance" type="number" min="0" step="0.1" />
+            </div>
+
+            <div class="field">
+              <label for="litres">Fuel used (L)</label>
+              <input id="litres" type="number" min="0" step="0.01" />
+            </div>
+
+            <div class="field">
+              <label for="cost">Cost of fuel (Rs)</label>
+              <input id="cost" type="number" min="0" step="0.01" />
+            </div>
+          </div>
+        </div>
+
+        <div class="step" data-step="4">
+          <div class="summary-box">
+            <p><strong>Brand:</strong> <span id="summaryBrand">-</span></p>
+            <p><strong>Model:</strong> <span id="summaryModel">-</span></p>
+            <p><strong>Year:</strong> <span id="summaryYear">-</span></p>
+            <p><strong>Fuel:</strong> <span id="summaryFuel">-</span></p>
+            <p><strong>Mileage:</strong> <span id="summaryMileage">-</span></p>
+            <p><strong>Color:</strong> <span id="summaryColor">-</span></p>
+            <p><strong>Fill-up:</strong> <span id="summaryFill">-</span></p>
+          </div>
+
+          <div class="result-box">
+            <div class="car-symbol">
+              <div class="car-body"></div>
+              <div class="wheel left"></div>
+              <div class="wheel right"></div>
+            </div>
+            <div class="car-text">
+              <h3 id="finalCarName">Your Car</h3>
+              <p id="finalCarMeta">Selected model will appear here</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn-secondary" id="backBtn" style="visibility:hidden;">Back</button>
+        <button type="button" class="btn-primary" id="nextBtn">Next</button>
+      </div>
+    </section>
+
+    <section class="panel" id="searchPanel">
+      <button type="button" class="btn-secondary home-btn">← Menu</button>
+      <h2>Search Vehicle</h2>
+      <div class="search-row">
+        <input id="searchInput" type="text" placeholder="Enter vehicle name..." />
+        <button class="btn-primary" id="searchBtn">Search</button>
+      </div>
+      <div class="table-wrap" style="margin-top: 18px;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Vehicle</th>
+              <th>Distance</th>
+              <th>Litres</th>
+              <th>Cost (Rs)</th>
+              <th>Mileage</th>
+              <th>Details</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="searchTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="allPanel">
+      <button type="button" class="btn-secondary home-btn">← Menu</button>
+      <h2>All Records</h2>
+
+      <div class="stats">
+        <div class="stat-card">
+          <h3>Total Records</h3>
+          <p id="totalRecords">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Distance</h3>
+          <p id="totalDistance">0.00 km</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Fuel</h3>
+          <p id="totalFuel">0.00 L</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Cost</h3>
+          <p id="totalCost">Rs. 0.00</p>
+        </div>
+        <div class="stat-card">
+          <h3>Avg Efficiency</h3>
+          <p id="avgEfficiency">No data</p>
+        </div>
+      </div>
+
+      <div class="analysis-list" id="vehicleAnalysis"></div>
+
+      <div class="table-wrap" style="margin-top: 18px;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Vehicle</th>
+              <th>Distance</th>
+              <th>Litres</th>
+              <th>Cost (Rs)</th>
+              <th>Mileage</th>
+              <th>Details</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const brandCatalog = [
+      "Acura", "Alfa Romeo", "Aston Martin", "Audi", "Bentley", "BMW", "Buick", "Cadillac",
+      "Chevrolet", "Chrysler", "Citroen", "Dacia", "Dodge", "Ferrari", "Fiat", "Ford",
+      "Genesis", "GMC", "Honda", "Hyundai", "Infiniti", "Jaguar", "Jeep", "Kia", "Lamborghini",
+      "Land Rover", "Lexus", "Lincoln", "Mahindra", "Maruti Suzuki", "Maserati", "Mazda", "Mercedes-Benz", "Mini", "Mitsubishi",
+      "Nissan", "Peugeot", "Porsche", "Ram", "Renault", "Rolls-Royce", "Saab", "Subaru",
+      "Suzuki", "Tata", "Tesla", "Toyota", "Volkswagen", "Volvo"
+    ];
+
+    const modelCatalog = {
+      Acura: ["ILX", "MDX", "RDX", "TLX", "NSX", "Integra"],
+      "Alfa Romeo": ["Giulia", "Stelvio", "Tonale", "4C", "MiTo"],
+      "Aston Martin": ["DB11", "DBS", "Vantage", "Rapide", "DBX"],
+      Audi: ["A3", "A4", "A6", "Q3", "Q5", "Q7", "R8", "RS5", "S4", "TT"],
+      Bentley: ["Continental GT", "Flying Spur", "Bentayga", "Mulsanne"],
+      BMW: ["3 Series", "5 Series", "7 Series", "X5", "X7", "M3", "M5", "i8", "Z4"],
+      Buick: ["Encore", "Enclave", "Regal", "LaCrosse"],
+      Cadillac: ["CTS", "Escalade", "XT4", "XT5", "CT4", "CT5"],
+      Chevrolet: ["Camaro", "Corvette", "Malibu", "Cruze", "Impala", "Tahoe", "Silverado"],
+      Chrysler: ["300", "Pacifica", "Voyager", "Aspen"],
+      Citroen: ["C3", "C4", "C5", "Berlingo", "DS3"],
+      Dacia: ["Sandero", "Duster", "Logan", "Lodgy"],
+      Dodge: ["Charger", "Challenger", "Durango", "Ram"],
+      Ferrari: ["488 GTB", "F8 Tributo", "Roma", "SF90 Stradale", "Portofino"],
+      Fiat: ["500", "Panda", "Tipo", "Doblo", "124 Spider"],
+      Ford: ["Focus", "Fiesta", "Mustang", "Explorer", "F-150", "Escape", "Bronco"],
+      Genesis: ["G80", "G90", "GV70", "GV80", "G70"],
+      GMC: ["Terrain", "Yukon", "Sierra", "Acadia"],
+      Honda: ["Civic", "Accord", "City", "CR-V", "HR-V", "Pilot", "Jazz", "BR-V"],
+      Hyundai: ["Elantra", "Accent", "Creta", "Tucson", "Santa Fe", "Ioniq", "Verna"],
+      Infiniti: ["Q50", "Q60", "QX50", "QX60", "QX80"],
+      Jaguar: ["XE", "XF", "F-Pace", "E-Pace", "F-Type", "I-Pace"],
+      Jeep: ["Wrangler", "Cherokee", "Grand Cherokee", "Compass", "Renegade"],
+      Kia: ["Seltos", "Sportage", "Carnival", "Sonet", "Rio", "Cerato", "Sorento"],
+      Lamborghini: ["Huracan", "Aventador", "Urus", "Gallardo"],
+      "Land Rover": ["Range Rover", "Discovery", "Defender", "Freelander", "Evoque"],
+      Lexus: ["IS", "ES", "RX", "NX", "GX", "LS", "UX"],
+      Lincoln: ["Navigator", "Corsair", "Aviator", "Nautilus"],
+      Mahindra: ["Thar", "Scorpio", "XUV700", "XUV300", "Bolero"],
+      "Maruti Suzuki": ["Swift", "Baleno", "Dzire", "Brezza", "Alto", "WagonR", "Ertiga"],
+      Maserati: ["Ghibli", "Quattroporte", "Levante", "MC20"],
+      Mazda: ["Mazda3", "Mazda6", "CX-5", "CX-9", "MX-5"],
+      "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "GLC", "GLE", "AMG GT", "CLA"],
+      Mini: ["Cooper", "Countryman", "Clubman", "One"],
+      Mitsubishi: ["Lancer", "Outlander", "Pajero", "Eclipse Cross"],
+      Nissan: ["Altima", "Sentra", "Skyline", "Patrol", "Rogue", "GTR", "X-Trail"],
+      Peugeot: ["208", "308", "508", "3008", "5008"],
+      Porsche: ["911", "Cayenne", "Panamera", "Macan", "Boxster", "Carrera"],
+      Ram: ["1500", "2500", "3500", "ProMaster"],
+      Renault: ["Clio", "Megane", "Captur", "Duster", "Kwid"],
+      "Rolls-Royce": ["Phantom", "Cullinan", "Ghost", "Wraith"],
+      Saab: ["9-3", "9-5", "900", "Sonett"],
+      Subaru: ["Impreza", "Legacy", "Outback", "WRX", "Forester", "Crosstrek"],
+      Suzuki: ["Swift", "Baleno", "Vitara", "Jimny", "Ciaz", "Ignis"],
+      Tata: ["Nexon", "Punch", "Harrier", "Safari", "Tiago", "Altroz"],
+      Tesla: ["Model S", "Model 3", "Model X", "Model Y", "Roadster"],
+      Toyota: ["Corolla", "Camry", "Fortuner", "Prius", "Yaris", "RAV4", "Land Cruiser", "Hilux"],
+      "Volkswagen": ["Golf", "Polo", "Passat", "Jetta", "Tiguan", "Touareg", "Beetle"],
+      Volvo: ["S60", "V60", "XC60", "XC90", "V90", "S90"]
+    };
+
+    const STORAGE_KEY = "fuel_records_v1";
+
+    const state = {
+      page: "menu",
+      addStep: 1,
+      brand: "",
+      model: ""
+    };
+
+    function getRecords() {
+      try {
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveRecords(records) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        return true;
+      } catch (e) {
+        alert("Couldn't save: browser storage is unavailable or full.");
+        return false;
+      }
+    }
+
+    function formatNumber(value) {
+      return Number(value || 0).toFixed(2);
+    }
+
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    function showPage(page) {
+      state.page = page;
+
+      document.querySelectorAll(".panel").forEach(panel => {
+        panel.classList.remove("active");
+      });
+
+      const menu = document.getElementById("menu");
+      menu.style.display = page === "menu" ? "grid" : "none";
+
+      if (page === "add") {
+        document.getElementById("addPanel").classList.add("active");
+      } else if (page === "search") {
+        document.getElementById("searchPanel").classList.add("active");
+      } else if (page === "all") {
+        updateSummaryAll();
+        document.getElementById("allPanel").classList.add("active");
+      }
+    }
+
+    function renderOptions(container, items, selected, typed, onPick, label) {
+      container.innerHTML = "";
+      items.forEach(name => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "result-item" + (name === selected ? " selected" : "");
+        btn.textContent = name;
+        btn.addEventListener("click", () => onPick(name));
+        container.appendChild(btn);
+      });
+      if (typed && !items.some(n => n.toLowerCase() === typed.toLowerCase())) {
+        const custom = document.createElement("button");
+        custom.type = "button";
+        custom.className = "custom-item";
+        custom.textContent = `Use ${label}: "${typed}"`;
+        custom.addEventListener("click", () => onPick(typed));
+        container.appendChild(custom);
+      }
+    }
+
+    function renderBrandSearchResults() {
+      const input = document.getElementById("brandSearch");
+      const typed = input.value.trim();
+      const q = typed.toLowerCase();
+
+      // Editing the text invalidates an earlier selection
+      if (state.brand && state.brand.toLowerCase() !== q) {
+        state.brand = "";
+        state.model = "";
+        document.getElementById("modelSearch").value = "";
+        renderModelSearchResults();
+      }
+
+      const matches = q ? brandCatalog.filter(b => b.toLowerCase().includes(q)).slice(0, 12) : [];
+      renderOptions(document.getElementById("brandResults"), matches, state.brand, typed, name => {
+        state.brand = name;
+        state.model = "";
+        input.value = name;
+        document.getElementById("modelSearch").value = "";
+        renderBrandSearchResults();
+        renderModelSearchResults();
+      }, "brand");
+      updateSummary();
+      updateAddProgress();
+    }
+
+    function renderModelSearchResults() {
+      const input = document.getElementById("modelSearch");
+      const typed = input.value.trim();
+      const q = typed.toLowerCase();
+      const results = document.getElementById("modelResults");
+
+      if (!state.brand) {
+        results.innerHTML = "<p class='hint'>Choose a brand first.</p>";
+        return;
+      }
+
+      if (state.model && state.model.toLowerCase() !== q) state.model = "";
+
+      const matches = (modelCatalog[state.brand] || []).filter(m => m.toLowerCase().includes(q)).slice(0, 12);
+      if (!matches.length && !typed) {
+        results.innerHTML = "<p class='hint'>Type a model name.</p>";
+        updateSummary();
+        return;
+      }
+
+      renderOptions(results, matches, state.model, typed, name => {
+        state.model = name;
+        input.value = name;
+        renderModelSearchResults();
+      }, "model");
+      updateSummary();
+    }
+
+    function updateAddProgress() {
+      const pills = document.querySelectorAll(".step-pill");
+      pills.forEach((pill, index) => {
+        pill.classList.remove("active", "done");
+        const stepNum = index + 1;
+
+        if (stepNum < state.addStep) {
+          pill.classList.add("done");
+        } else if (stepNum === state.addStep) {
+          pill.classList.add("active");
+        }
+      });
+    }
+
+    function showAddStep(step) {
+      state.addStep = step;
+
+      const steps = document.querySelectorAll(".step");
+      steps.forEach(s => {
+        const sNum = Number(s.dataset.step);
+        s.style.display = sNum === step ? "block" : "none";
+      });
+
+      const backBtn = document.getElementById("backBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      backBtn.style.visibility = step === 1 ? "hidden" : "visible";
+
+      if (step === 4) {
+        nextBtn.textContent = "Save";
+      } else {
+        nextBtn.textContent = "Next";
+      }
+
+      updateAddProgress();
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const year = document.getElementById("year")?.value || "-";
+      const fuel = document.getElementById("fuel")?.value || "-";
+      const mileage = document.getElementById("mileage")?.value || "-";
+      const color = document.getElementById("color")?.value || "-";
+
+      document.getElementById("summaryBrand").textContent = state.brand || "-";
+      document.getElementById("summaryModel").textContent = state.model || "-";
+      document.getElementById("summaryYear").textContent = year;
+      document.getElementById("summaryFuel").textContent = fuel;
+      document.getElementById("summaryMileage").textContent = mileage === "-" ? "-" : mileage + " km/L";
+      document.getElementById("summaryColor").textContent = color;
+
+      const parts = [];
+      const dist = document.getElementById("distance")?.value;
+      const lit = document.getElementById("litres")?.value;
+      const cost = document.getElementById("cost")?.value;
+      if (dist) parts.push(`${dist} km`);
+      if (lit) parts.push(`${lit} L`);
+      if (cost) parts.push(`Rs. ${cost}`);
+      document.getElementById("summaryFill").textContent = parts.join(" • ") || "-";
+
+      document.getElementById("finalCarName").textContent = `${state.brand || "Your"} ${state.model || "Car"}`;
+      document.getElementById("finalCarMeta").textContent = `${year} • ${fuel} • ${color} • ${mileage} km/L`;
+    }
+
+    function validateAddStep() {
+      if (state.addStep === 1 && !state.brand) {
+        alert("Pick a brand from the list, or choose “Use brand” to enter your own.");
+        return false;
+      }
+      if (state.addStep === 2 && !state.model) {
+        alert("Pick a model from the list, or choose “Use model” to enter your own.");
+        return false;
+      }
+      if (state.addStep === 3) return validateDetails();
+      return true;
+    }
+
+    function readDetails() {
+      const num = id => {
+        const v = document.getElementById(id).value.trim();
+        return v === "" ? null : Number(v);
+      };
+      return {
+        year: num("year"), mileage: num("mileage"),
+        distance: num("distance"), litres: num("litres"), cost: num("cost"),
+        fuel: document.getElementById("fuel").value,
+        color: document.getElementById("color").value.trim()
+      };
+    }
+
+    function validateDetails() {
+      const d = readDetails();
+      let msg = "";
+      if (!Number.isInteger(d.year) || d.year < 2000 || d.year > 2035) msg = "Enter a year between 2000 and 2035.";
+      else if (!d.color) msg = "Enter a color.";
+      else if (!(d.distance > 0)) msg = "Enter the distance travelled (km).";
+      else if (!(d.litres > 0)) msg = "Enter the fuel used (L).";
+      else if (!(d.cost > 0)) msg = "Enter the cost of fuel (Rs).";
+      else if (!(d.mileage > 0)) msg = "Mileage couldn't be calculated. Check distance and fuel used.";
+      if (msg) {
+        alert(msg);
+        return false;
+      }
+      return true;
+    }
+
+    function saveFuelEntry() {
+      if (!state.brand || !state.model) {
+        alert("Choose a brand and model.");
+        return;
+      }
+      if (!validateDetails()) return;
+
+      const d = readDetails();
+      const records = getRecords();
+      records.unshift({
+        id: records.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1,
+        vehicle: `${state.brand} ${state.model}`,
+        distance: d.distance || 0,
+        litres: d.litres || 0,
+        totalCost: d.cost || 0,
+        efficiency: d.mileage,
+        year: d.year,
+        fuel: d.fuel,
+        color: d.color
+      });
+
+      if (!saveRecords(records)) return;
+      alert("Vehicle details saved.");
+      resetAddForm();
+      showPage("menu");
+    }
+
+    function resetAddForm() {
+      state.brand = "";
+      state.model = "";
+      document.getElementById("brandSearch").value = "";
+      document.getElementById("modelSearch").value = "";
+      document.getElementById("year").value = "2024";
+      document.getElementById("fuel").value = "Petrol";
+      document.getElementById("mileage").value = "";
+      document.getElementById("color").value = "Blue";
+      document.getElementById("distance").value = "";
+      document.getElementById("litres").value = "";
+      document.getElementById("cost").value = "";
+      document.getElementById("brandResults").innerHTML = "";
+      document.getElementById("modelResults").innerHTML = "";
+      updateSummary();
+    }
+
+    function rowsHtml(records) {
+      return records.map(r => `
+        <tr>
+          <td>${esc(r.id)}</td>
+          <td>${esc(r.vehicle)}</td>
+          <td>${formatNumber(r.distance)}</td>
+          <td>${formatNumber(r.litres)}</td>
+          <td>${formatNumber(r.totalCost)}</td>
+          <td>${formatNumber(r.efficiency)}</td>
+          <td>${esc([r.year, r.fuel, r.color].filter(Boolean).join(" • "))}</td>
+          <td><button type="button" class="btn-secondary del-btn" data-id="${esc(r.id)}">Delete</button></td>
+        </tr>`).join("");
+    }
+
+    function renderTable(records) {
+      document.getElementById("recordsTableBody").innerHTML = records.length
+        ? rowsHtml(records)
+        : "<tr><td colspan='8'>No records yet. Use Add Details to create one.</td></tr>";
+    }
+
+    function renderSearchTable(searchText) {
+      const q = (searchText || "").toLowerCase();
+      const filtered = getRecords().filter(r => String(r.vehicle).toLowerCase().includes(q));
+      document.getElementById("searchTableBody").innerHTML = filtered.length
+        ? rowsHtml(filtered)
+        : "<tr><td colspan='8'>No matching vehicle found.</td></tr>";
+    }
+
+    function renderVehicleAnalysis(records) {
+      const container = document.getElementById("vehicleAnalysis");
+
+      if (!records.length) {
+        container.innerHTML = "<p>No data available.</p>";
+        return;
+      }
+
+      const grouped = {};
+      records.forEach(r => {
+        if (!grouped[r.vehicle]) {
+          grouped[r.vehicle] = { totalCost: 0, totalEfficiency: 0, count: 0 };
+        }
+        grouped[r.vehicle].totalCost += Number(r.totalCost);
+        grouped[r.vehicle].totalEfficiency += Number(r.efficiency);
+        grouped[r.vehicle].count += 1;
+      });
+
+      const items = Object.entries(grouped)
+        .map(([vehicle, data]) => ({
+          vehicle,
+          avgEfficiency: data.totalEfficiency / data.count,
+          totalCost: data.totalCost
+        }))
+        .sort((a, b) => b.avgEfficiency - a.avgEfficiency);
+
+      container.innerHTML = items.map(item => `
+        <div class="analysis-item">
+          <strong>${esc(item.vehicle)}</strong>
+          <span>Avg mileage: ${formatNumber(item.avgEfficiency)} km/L</span>
+          <span>Total cost: Rs. ${formatNumber(item.totalCost)}</span>
+        </div>
+      `).join("");
+    }
+
+    function updateSummaryAll() {
+      const records = getRecords();
+      const totalRecords = records.length;
+      const totalDistance = records.reduce((sum, r) => sum + Number(r.distance), 0);
+      const totalFuel = records.reduce((sum, r) => sum + Number(r.litres), 0);
+      const totalCost = records.reduce((sum, r) => sum + Number(r.totalCost), 0);
+      const avgEfficiency = records.length
+        ? records.reduce((sum, r) => sum + Number(r.efficiency), 0) / records.length
+        : null;
+
+      document.getElementById("totalRecords").textContent = totalRecords;
+      document.getElementById("totalDistance").textContent = `${formatNumber(totalDistance)} km`;
+      document.getElementById("totalFuel").textContent = `${formatNumber(totalFuel)} L`;
+      document.getElementById("totalCost").textContent = `Rs. ${formatNumber(totalCost)}`;
+      document.getElementById("avgEfficiency").textContent =
+        avgEfficiency !== null ? `${formatNumber(avgEfficiency)} km/L` : "No data";
+
+      renderTable(records);
+      renderVehicleAnalysis(records);
+    }
+
+    document.getElementById("menu").addEventListener("click", (event) => {
+      const card = event.target.closest(".menu-card");
+      if (!card) return;
+
+      const page = card.dataset.page;
+
+      if (page === "add") {
+        resetAddForm();
+        showAddStep(1);
+        showPage("add");
+      } else if (page === "search") {
+        showPage("search");
+        document.getElementById("searchInput").value = "";
+        renderSearchTable("");
+      } else if (page === "all") {
+        updateSummaryAll();
+        showPage("all");
+      }
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      if (!validateAddStep()) return;
+
+      if (state.addStep < 4) {
+        state.addStep += 1;
+        showAddStep(state.addStep);
+      } else {
+        saveFuelEntry();
+      }
+    });
+
+    document.getElementById("backBtn").addEventListener("click", () => {
+      if (state.addStep > 1) {
+        state.addStep -= 1;
+        showAddStep(state.addStep);
+      }
+    });
+
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      const value = document.getElementById("searchInput").value.trim();
+      renderSearchTable(value);
+    });
+
+    document.getElementById("searchInput").addEventListener("input", () => {
+      const value = document.getElementById("searchInput").value.trim();
+      renderSearchTable(value);
+    });
+
+    document.getElementById("brandSearch").addEventListener("input", renderBrandSearchResults);
+    document.getElementById("modelSearch").addEventListener("input", renderModelSearchResults);
+
+    document.getElementById("year").addEventListener("input", updateSummary);
+    document.getElementById("fuel").addEventListener("change", updateSummary);
+    document.getElementById("mileage").addEventListener("input", updateSummary);
+    document.getElementById("color").addEventListener("input", updateSummary);
+
+    function autoMileage() {
+      const d = Number(document.getElementById("distance").value);
+      const l = Number(document.getElementById("litres").value);
+      document.getElementById("mileage").value = d > 0 && l > 0 ? (d / l).toFixed(2) : "";
+      updateSummary();
+    }
+    document.getElementById("distance").addEventListener("input", autoMileage);
+    document.getElementById("litres").addEventListener("input", autoMileage);
+    document.getElementById("cost").addEventListener("input", updateSummary);
+
+    document.querySelectorAll(".home-btn").forEach(btn => btn.addEventListener("click", () => showPage("menu")));
+
+    document.getElementById("menu").addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const card = event.target.closest(".menu-card");
+      if (!card) return;
+      event.preventDefault();
+      card.click();
+    });
+
+    document.addEventListener("click", (event) => {
+      const btn = event.target.closest(".del-btn");
+      if (!btn) return;
+      if (!confirm("Delete this record?")) return;
+      saveRecords(getRecords().filter(r => String(r.id) !== btn.dataset.id));
+      if (state.page === "search") renderSearchTable(document.getElementById("searchInput").value.trim());
+      else updateSummaryAll();
+    });
+
+    showAddStep(1);
+    showPage("menu");
+  </script>
+</body>
+</html>
